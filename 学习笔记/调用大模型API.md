@@ -317,9 +317,11 @@ public class NonStreamingChat {
 }
 ```
 
-## 3. 运行效果
+## 3. 关键代码解读
 
-把 `YOUR_API_KEY` 替换成你自己的 API Key，运行这段代码，控制台输出大概长这样：
+- **创建 HTTP 客户端**：OkHttp 的标准用法。注意设置了超时时间——大模型生成回答可能需要几秒到十几秒，默认的超时时间可能不够
+- **构建 HTTP 请求**：POST 请求，URL 是 SiliconFlow 的 Chat API 地址。`Authorization` 头用 `Bearer` 方式传递 API Key，这是 OAuth 2.0 的标准做法
+- **发送请求**：`client.newCall(request).execute()` 是同步调用，会阻塞当前线程直到收到响应。用 try-with-resources 确保响应体被正确关闭
 # 流式调用：像打字一样逐字输出
 
 ## 1. 为什么需要流式调用
@@ -328,3 +330,186 @@ public class NonStreamingChat {
 
 >如果是深度思考，这个首包响应时间会更长。注意是首包。
 
+## 2. SSE（Server-Sent Events）协议简介
+
+流式调用基于一个叫 SSE（Server-Sent Events，服务端推送事件）的协议。不需要深入了解 SSE 的所有细节，只要理解它的核心思想就行。
+
+普通的 HTTP 请求是一问一答的模式：客户端发一个请求，服务端返回一个完整的响应，然后连接就关闭了。
+
+SSE 不一样：客户端发出请求后，服务端不会一次性返回所有内容然后关闭连接，而是保持连接打开，持续地往客户端推送数据块。每个数据块是一行文本，以 `data:` 开头。当所有内容都推送完毕后，服务端会发送一个特殊的结束标记 `data: [DONE]`，然后关闭连接。
+![[Pasted image 20260318175116.png]]
+
+## 3. 流式响应的数据格式
+
+流式响应和非流式响应的 JSON 结构有一个关键区别：非流式响应中，模型的回答在 `choices[0].message` 里；流式响应中，每个数据块的增量内容在 `choices[0].delta` 里。
+
+``` json
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"role":"assistant","content":""},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"content":"可以"},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"content":"的。"},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"content":"根据"},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"content":"退货"},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{"content":"政策"},"finish_reason":null}]}
+​
+data: {"id":"chatcmpl-abc123","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}
+​
+data: [DONE]
+```
+
+注意几个细节：
+
+- 第一个数据块的 `delta` 里有 `role: "assistant"`，表示这是助手的回答开始了
+- 中间的数据块，`delta` 里只有 `content` 字段，包含增量内容（新生成的几个字）
+- 倒数第二个数据块的 `delta` 为空，`finish_reason` 变成了 `"stop"`，表示模型生成完毕
+- 最后一行 `data: [DONE]` 是 SSE 的结束标记，不是 JSON 格式
+- 数据块之间可能有空行，解析时需要跳过
+## 4. 完整代码实现
+``` Java
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import okhttp3.*;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
+public class StreamingChat {
+
+    private static final String API_URL = "https://api.siliconflow.cn/v1/chat/completions";
+    private static final String API_KEY = "YOUR_API_KEY";
+
+    public static void main(String[] args) throws IOException {
+        // 1. 构建请求体（注意 stream 设为 true）
+        JsonObject requestBody = new JsonObject();
+        requestBody.addProperty("model", "Qwen/Qwen3-32B");
+        requestBody.addProperty("temperature", 0.1);
+        requestBody.addProperty("max_tokens", 1024);
+        requestBody.addProperty("stream", true);  // 开启流式
+
+        JsonArray messages = new JsonArray();
+
+        JsonObject systemMsg = new JsonObject();
+        systemMsg.addProperty("role", "system");
+        systemMsg.addProperty("content", "你是一个专业的电商客服助手，回答要简洁明了。");
+        messages.add(systemMsg);
+
+        JsonObject userMsg = new JsonObject();
+        userMsg.addProperty("role", "user");
+        userMsg.addProperty("content", "买了一周的东西还能退吗？");
+        messages.add(userMsg);
+
+        requestBody.add("messages", messages);
+
+        // 2. 创建 OkHttp 客户端
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)  // 流式调用需要更长的读取超时
+                .build();
+
+        // 3. 构建请求
+        Request request = new Request.Builder()
+                .url(API_URL)
+                .addHeader("Authorization", "Bearer " + API_KEY)
+                .addHeader("Content-Type", "application/json")
+                .post(RequestBody.create(
+                        requestBody.toString(),
+                        MediaType.parse("application/json")
+                ))
+                .build();
+
+        // 4. 发送请求并逐行读取 SSE 响应
+        Gson gson = new Gson();
+        StringBuilder fullContent = new StringBuilder();
+
+        System.out.println("=== 模型回答（流式输出）===");
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.out.println("请求失败，状态码：" + response.code());
+                System.out.println("错误信息：" + response.body().string());
+                return;
+            }
+
+            // 逐行读取响应体
+            BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(response.body().byteStream())
+            );
+
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // 跳过空行
+                if (line.isEmpty()) {
+                    continue;
+                }
+
+                // 每行以 "data: " 开头，去掉前缀
+                if (!line.startsWith("data: ")) {
+                    continue;
+                }
+                String data = line.substring(6);  // 去掉 "data: " 前缀（6 个字符）
+
+                // 检查是否是结束标记
+                if ("[DONE]".equals(data)) {
+                    break;
+                }
+
+                // 解析 JSON，提取增量内容
+                JsonObject chunk = gson.fromJson(data, JsonObject.class);
+                JsonArray choices = chunk.getAsJsonArray("choices");
+                if (choices != null && choices.size() > 0) {
+                    JsonObject delta = choices.get(0).getAsJsonObject()
+                            .getAsJsonObject("delta");
+                    if (delta != null && delta.has("content")) {
+                        JsonElement contentElement = delta.get("content");
+                        if (!contentElement.isJsonNull()) {
+                            String content = contentElement.getAsString();
+                            // 实时打印增量内容（不换行，模拟打字效果）
+                            System.out.print(content);
+                            fullContent.append(content);
+                        }
+                    }
+                }
+            }
+        }
+
+        // 输出完毕，换行
+        System.out.println();
+        System.out.println();
+        System.out.println("=== 完整回答 ===");
+        System.out.println(fullContent);
+    }
+}
+```
+
+## 5 流式代码的关键点
+
+和非流式代码相比，流式代码有几个关键的不同：
+
+- 1.**请求体中 `stream` 设为 `true`**：告诉服务端用 SSE 方式返回
+- 2.**用 `BufferedReader` 逐行读取**：不能用 `response.body().string()` 一次性读取，因为响应是持续推送的，要逐行处理
+- 3.**解析 `delta` 而不是 `message`**：流式响应中，增量内容在 `choices[0].delta.content` 里，不是 `choices[0].message.content`
+- 4.**处理 `[DONE]` 结束标记**：收到 `data: [DONE]` 就停止读取
+- 5.**用 `System.out.print`（不是 `println`）**：实时输出不换行，模拟打字效果
+- 6.**读取超时要设长一些**：流式调用的连接会保持较长时间，`readTimeout` 建议设到 120
+# 非流式 vs 流式：怎么选
+| 对比维度       | 非流式（stream=false）  | 流式（stream=true）       |
+| ---------- | ------------------ | --------------------- |
+| 响应方式       | 模型生成完毕后一次性返回       | 模型边生成边推送，逐块返回         |
+| 首字延迟       | 高（要等全部生成完）         | 低（几乎立刻开始输出）           |
+| 用户体验       | 等待感强，适合后台处理        | 打字机效果，体验流畅            |
+| 实现复杂度      | 简单，标准的 HTTP 请求/响应  | 稍复杂，需要处理 SSE 数据流      |
+| 响应体格式      | 完整的 JSON，直接解析      | 多个 JSON 数据块，需要逐块解析并拼接 |
+| Token 用量统计 | 响应中直接包含 `usage` 字段 | 部分平台在流式响应中不返回 `usage` |
+| 适用场景       | 后台批量处理、不需要实时展示的场景  | 面向用户的实时对话、需要即时反馈的场景   |
+在 RAG 系统中，两种方式都会用到：
+- **生成回答**（Chat API）：面向用户的场景用流式，让用户看到打字机效果；后台测试或批量处理用非流式
+- **文本向量化**（Embedding API）：后台处理，不需要实时展示，用非流式
+- **检索结果重排序**（Reranker API）：后台处理，用非流式
