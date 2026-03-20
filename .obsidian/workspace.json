@@ -95,7 +95,7 @@
               "type": "backlink",
               "state": {
                 "file": "学习笔记/Prompt工程入门.md",
-                "collapseAll": false,
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
                 "showSearch": false,
@@ -142,16 +142,17 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "easyCoupon开发笔记.md",
+                "file": "学习笔记/Prompt工程入门.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "easyCoupon开发笔记 的大纲"
+              "title": "Prompt工程入门 的大纲"
             }
           }
-        ]
+        ],
+        "currentTab": 3
       }
     ],
     "direction": "horizontal",
@@ -169,17 +170,17 @@
       "homepage:Open homepage": false
     }
   },
-  "active": "e7a7b303c61786dc",
+  "active": "0a90fc6f158cfbf1",
   "lastOpenFiles": [
     "学习笔记/Java笔记/Ragent开发笔记.md",
+    "学习笔记/Java笔记/easyCoupon开发笔记.md",
+    "学习笔记/Java笔记/knife4j.md",
+    "学习笔记/Prompt工程入门.md",
     "Home.md",
     "计算机视觉/计算机视觉(cs231n).md",
-    "学习笔记/Prompt工程入门.md",
     "元认知.md",
     "学习笔记/调用大模型API.md",
-    "学习笔记/Java笔记/knife4j.md",
     "学习笔记/大模型.md",
-    "学习笔记/Java笔记/easyCoupon开发笔记.md",
     "当前困境与发展.md",
     "新建 DOC 文档.doc",
     "未命名.base",
