@@ -2,7 +2,7 @@
 tags:
   - Home
 ---
-- [ ] [[赚一笔Openclaw的安装费]]
+- [x] [[赚一笔Openclaw的安装费]](放弃)
 ## 🐈‍⬛Github
 [Github主页](https://github.com)
 [Github个人主页]()
