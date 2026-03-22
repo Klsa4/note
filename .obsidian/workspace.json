@@ -4,39 +4,71 @@
     "type": "split",
     "children": [
       {
-        "id": "53b162df83e8c72e",
+        "id": "4509724f8bf84da7",
         "type": "tabs",
         "children": [
           {
-            "id": "23c5ccb2116ac3e3",
+            "id": "e7a7b303c61786dc",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "学习笔记/Java笔记/Ragent开发笔记.md",
+                "file": "Home.md",
                 "mode": "source",
-                "source": false
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
               "icon": "lucide-file",
-              "title": "Ragent开发笔记"
+              "title": "Home"
             }
           },
           {
-            "id": "42a0e323e289ac46",
+            "id": "fc5b694bd7fbea34",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "学习笔记/什么是RAG系统？.md",
+                "file": "学习笔记/魔数检测.md",
                 "mode": "source",
-                "source": false
+                "source": false,
+                "backlinks": true,
+                "backlinkOpts": {
+                  "collapseAll": false,
+                  "extraContext": false,
+                  "sortOrder": "alphabetical",
+                  "showSearch": false,
+                  "searchQuery": "",
+                  "backlinkCollapsed": false,
+                  "unlinkedCollapsed": true
+                }
               },
               "icon": "lucide-file",
-              "title": "什么是RAG系统？"
+              "title": "魔数检测"
+            }
+          },
+          {
+            "id": "c93ef77245b16713",
+            "type": "leaf",
+            "state": {
+              "type": "bases",
+              "state": {
+                "file": "未命名.base",
+                "viewName": "表格"
+              },
+              "icon": "lucide-table",
+              "title": "未命名"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -157,13 +189,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "学习笔记/什么是RAG系统？.md",
+                "file": "Home.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "什么是RAG系统？ 的大纲"
+              "title": "Home 的大纲"
             }
           }
         ],
@@ -185,21 +217,23 @@
       "homepage:Open homepage": false
     }
   },
-  "active": "42a0e323e289ac46",
+  "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
-    "学习笔记/大模型.md",
-    "学习笔记/什么是RAG系统？.md",
-    "学习笔记/Java笔记/Ragent开发笔记.md",
-    "Home.md",
+    "元认知.md",
+    "未命名.base",
     "当前困境与发展.md",
+    "().md",
+    "Home.md",
+    "学习笔记/解析文档.md",
+    "学习笔记/魔数检测.md",
+    "学习笔记/Java笔记/Ragent开发笔记.md",
+    "学习笔记/什么是RAG系统？.md",
+    "学习笔记/大模型.md",
     "计算机视觉/计算机视觉(cs231n).md",
     "学习笔记/Prompt工程入门.md",
     "学习笔记/知识库.md",
-    "未命名.base",
-    "().md",
     "学习笔记/Java笔记/easyCoupon开发笔记.md",
     "学习笔记/Java笔记/knife4j.md",
-    "元认知.md",
     "学习笔记/调用大模型API.md",
     "新建 DOC 文档.doc",
     "images/Pasted image 20250925194420.png",
