@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Home.md",
+                "file": "学习笔记/解析文档.md",
                 "mode": "source",
                 "source": false,
                 "backlinks": true,
@@ -28,44 +28,7 @@
                 }
               },
               "icon": "lucide-file",
-              "title": "Home"
-            }
-          },
-          {
-            "id": "fc5b694bd7fbea34",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "学习笔记/魔数检测.md",
-                "mode": "source",
-                "source": false,
-                "backlinks": true,
-                "backlinkOpts": {
-                  "collapseAll": false,
-                  "extraContext": false,
-                  "sortOrder": "alphabetical",
-                  "showSearch": false,
-                  "searchQuery": "",
-                  "backlinkCollapsed": false,
-                  "unlinkedCollapsed": true
-                }
-              },
-              "icon": "lucide-file",
-              "title": "魔数检测"
-            }
-          },
-          {
-            "id": "c93ef77245b16713",
-            "type": "leaf",
-            "state": {
-              "type": "bases",
-              "state": {
-                "file": "未命名.base",
-                "viewName": "表格"
-              },
-              "icon": "lucide-table",
-              "title": "未命名"
+              "title": "解析文档"
             }
           }
         ]
@@ -189,13 +152,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Home.md",
+                "file": "学习笔记/解析文档.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Home 的大纲"
+              "title": "解析文档 的大纲"
             }
           }
         ],
@@ -219,14 +182,15 @@
   },
   "active": "e7a7b303c61786dc",
   "lastOpenFiles": [
+    "学习笔记/Java笔记/DTO.md",
+    "学习笔记/解析文档.md",
+    "学习笔记/Java笔记/Ragent开发笔记.md",
+    "Home.md",
     "元认知.md",
     "未命名.base",
     "当前困境与发展.md",
     "().md",
-    "Home.md",
-    "学习笔记/解析文档.md",
     "学习笔记/魔数检测.md",
-    "学习笔记/Java笔记/Ragent开发笔记.md",
     "学习笔记/什么是RAG系统？.md",
     "学习笔记/大模型.md",
     "计算机视觉/计算机视觉(cs231n).md",

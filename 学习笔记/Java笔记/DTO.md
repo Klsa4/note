@@ -1,0 +1,1 @@
+全称Data Transformer Object，即数据传输对象，在Java项目中常作为网络的数据传输
